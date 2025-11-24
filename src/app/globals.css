@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* 🔴 Brutalist Brand Colors */
+  --color-brand: #F72C25;      /* Bold red */
+  --color-accent: #000000;     /* Black */
+  --color-highlight: #FFFFFF;  /* White accents */
+  
+  /* 🔤 Brutalist Fonts */
+  --font-headline: "Unbounded", system-ui, sans-serif;
+  --font-body: "IBM Plex Mono", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Custom Scrollbar (brutalist feel) */
+::-webkit-scrollbar {
+  width: 8px;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::-webkit-scrollbar-track {
+  background: #F72C25;
+}
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 2px solid #F72C25;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: #F72C25;
+  color: #000;
+}
+
+::selection { 
+  background: #000; 
+  color: #FFF; 
 }
