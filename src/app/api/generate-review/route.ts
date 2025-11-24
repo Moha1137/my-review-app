@@ -1,4 +1,3 @@
-// src/app/api/generate-review/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -11,14 +10,13 @@ export async function POST(req: NextRequest) {
             title: string;
             type: MediaType;
             mode?: Mode;
-            pro?: boolean; // temporary flag until Stripe gates this
+            pro?: boolean;
         };
 
         if (!title || !type) {
             return NextResponse.json({ error: "Missing title or type" }, { status: 400 });
         }
 
-        // Gate detailed mode behind pro
         const effectiveMode: Mode = mode === "detailed" && pro ? "detailed" : "simple";
 
         const client = new OpenAI({
@@ -27,29 +25,29 @@ export async function POST(req: NextRequest) {
         });
 
         const simpleSchema = {
-            type: "object",
+            type: "object" as const,
             additionalProperties: false,
             properties: {
-                summary: { type: "string", description: "80–120 words max." },
+                summary: { type: "string" as const, description: "80–120 words max." },
                 genres: {
-                    type: "array",
-                    items: { type: "string" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     minItems: 3,
                     maxItems: 3,
                 },
                 themes: {
-                    type: "array",
-                    items: { type: "string" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     minItems: 3,
                     maxItems: 3,
                 },
                 consensus: {
-                    type: "string",
+                    type: "string" as const,
                     description: "One sentence of general audience or critic consensus.",
                 },
                 citations: {
-                    type: "array",
-                    items: { type: "string", format: "uri" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     maxItems: 3,
                 },
             },
@@ -57,38 +55,38 @@ export async function POST(req: NextRequest) {
         };
 
         const detailedSchema = {
-            type: "object",
+            type: "object" as const,
             additionalProperties: false,
             properties: {
-                summary: { type: "string", description: "2 short paragraphs max." },
+                summary: { type: "string" as const, description: "2 short paragraphs max." },
                 genres: {
-                    type: "array",
-                    items: { type: "string" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     minItems: 3,
                     maxItems: 6,
                 },
                 themes: {
-                    type: "array",
-                    items: { type: "string" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     minItems: 5,
                     maxItems: 8,
                 },
                 character_insights: {
-                    type: "array",
-                    items: { type: "string" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     minItems: 3,
                     maxItems: 5,
                 },
                 discussion_questions: {
-                    type: "array",
-                    items: { type: "string" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     minItems: 3,
                     maxItems: 5,
                 },
-                adaptation_notes: { type: "string" },
+                adaptation_notes: { type: "string" as const },
                 citations: {
-                    type: "array",
-                    items: { type: "string", format: "uri" },
+                    type: "array" as const,
+                    items: { type: "string" as const },
                     maxItems: 6,
                 },
             },
@@ -97,7 +95,7 @@ export async function POST(req: NextRequest) {
 
         const schema = effectiveMode === "simple" ? simpleSchema : detailedSchema;
 
-        const messages = [
+        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
             {
                 role: "system",
                 content:
@@ -114,7 +112,14 @@ export async function POST(req: NextRequest) {
         const completion = await client.chat.completions.create({
             model: "sonar-pro",
             messages,
-            response_format: { type: "json_schema", json_schema: { schema } },
+            response_format: {
+                type: "json_schema",
+                json_schema: {
+                    name: "media_review",
+                    schema,
+                    strict: true,
+                },
+            },
             temperature: effectiveMode === "simple" ? 0.5 : 0.7,
             max_tokens: effectiveMode === "simple" ? 500 : 1200,
         });
@@ -124,6 +129,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json(parsed);
     } catch (err: any) {
+        console.error("API Error:", err);
         return NextResponse.json({ error: err?.message ?? "Unknown error" }, { status: 500 });
     }
 }
