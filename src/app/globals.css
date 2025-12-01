@@ -1,35 +1,41 @@
 @import "tailwindcss";
 
-@theme {
-  /* 🔴 Brutalist Brand Colors */
-  --color-brand: #F72C25;      /* Bold red */
-  --color-accent: #000000;     /* Black */
-  --color-highlight: #FFFFFF;  /* White accents */
-  
-  /* 🔤 Brutalist Fonts */
-  --font-headline: "Unbounded", system-ui, sans-serif;
-  --font-body: "IBM Plex Mono", monospace;
+/* 1. Register the Custom Font */
+@font-face {
+  font-family: 'BlueRabbit';  /* Removed space to be safe */
+  src: url('/fonts/BlueRabbit.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Good practice */
 }
 
-/* Custom Scrollbar (brutalist feel) */
+@theme {
+  /* Colors */
+  --color-brand: #C5C5C5;
+  --color-accent: #333333;
+  --color-purpleBlur: #8278C8;
+  
+  /* Fonts */
+  /* Make sure this matches the font-family name above exactly */
+  --font-logo: "BlueRabbit", sans-serif; 
+  --font-serif: "DM Serif Display", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+html, body {
+  background-color: #C5C5C5; 
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #F72C25;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #000;
-  border: 2px solid #F72C25;
-}
-
-body {
-  font-family: var(--font-body);
-  background: #F72C25;
-  color: #000;
-}
-
-::selection { 
-  background: #000; 
-  color: #FFF; 
+  background: #888;
+  border-radius: 4px;
 }

@@ -1,192 +1,133 @@
 "use client";
 import { useState } from "react";
 
+type MediaType = "book" | "manga" | "movie" | "tv";
+
 export default function Home() {
   const [title, setTitle] = useState("");
-  const [type, setType] = useState<"book" | "manga" | "movie" | "tv">("manga");
-  const [mode, setMode] = useState<"simple" | "detailed">("simple");
-  const [pro, setPro] = useState(false);
+  const [type, setType] = useState<MediaType>("manga");
+  
+  const [showReview, setShowReview] = useState(true);
+  const [showSynopsis, setShowSynopsis] = useState(false);
+  const [spoilerMode, setSpoilerMode] = useState(false);
+
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const toggleSpoiler = () => {
+    if (!spoilerMode) {
+      const confirmSpoiler = window.confirm("Are you sure you want to be spoiled?");
+      if (confirmSpoiler) setSpoilerMode(true);
+    } else {
+      setSpoilerMode(false);
+    }
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setData(null);
+
     try {
       const res = await fetch("/api/generate-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, type, mode, pro }),
+        body: JSON.stringify({ 
+          title, 
+          type, 
+          mode: showSynopsis ? "detailed" : "simple", 
+          spoiler: spoilerMode, 
+          pro: true 
+        }),
       });
+      
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Request failed");
-      setData(json);
+      setData({ ...json, title });
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message ?? "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
 
-  const handleReset = () => {
-    setTitle("");
-    setType("manga");
-    setMode("simple");
-    setData(null);
-    setError(null);
-  };
-
   return (
-    <div className="relative flex flex-col min-h-screen bg-brand text-accent">
+    <div className="min-h-screen flex flex-col items-center bg-[#C5C5C5] p-4 font-sans relative overflow-x-hidden">
+      
+      <div className="fixed top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] md:w-[120%] h-[400px] md:h-[500px] bg-[#7D73C3] blur-[100px] md:blur-[130px] rounded-[100%] opacity-90 pointer-events-none z-0" />
+
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-10 bg-brand/95 backdrop-blur-sm border-b-4 border-accent">
-        <div className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={handleReset}>
-            <div className="size-8 text-accent group-hover:rotate-12 transition-transform">
-              <svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z"></path>
-              </svg>
-            </div>
-            <h1 className="text-3xl font-headline font-bold tracking-tight">NOBIX</h1>
-          </div>
-        </div>
+      <header className="w-full text-center pt-8 md:pt-12 pb-2 z-10">
+        {/* Explicitly setting font family in inline style to force it */}
+        <h1 className="text-2xl md:text-4xl tracking-wide text-[#333333]" style={{ fontFamily: "'BlueRabbit', sans-serif" }}>
+          reevyou
+        </h1>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 pt-28 pb-40 px-6">
-        <div className="max-w-3xl mx-auto space-y-8">
-          {!data && !error && (
-            <div className="flex flex-col items-center text-center pt-16 animate-in fade-in zoom-in duration-500">
-              <div className="mb-6 size-16 p-2 rounded-full border-4 border-accent">
-                <svg className="size-full" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z"></path>
-                </svg>
-              </div>
-              <h2 className="text-4xl font-headline font-bold mb-4">Get an honest review</h2>
-              <p className="text-lg font-body opacity-80">Enter a title below to generate an AI-powered synopsis</p>
-            </div>
-          )}
-
-          {/* User Input Message */}
-          {(data || error) && (
-            <div className="flex items-start gap-4 p-4 animate-in slide-in-from-bottom-2 duration-300">
-              <p className="font-bold text-lg pt-2 min-w-[80px]">[ You ]</p>
-              <p className="text-lg leading-relaxed flex-1 font-medium">{title} ({type})</p>
-            </div>
-          )}
-
-          {/* AI Response - Success */}
-          {data && !error && (
-            <div className="flex items-start gap-4 p-4 animate-in slide-in-from-bottom-2 duration-300">
-              <p className="font-bold text-lg pt-2 min-w-[80px]">[ AI ]</p>
-              <div className="flex-1 bg-accent text-highlight p-6 rounded-2xl border-4 border-accent shadow-[8px_8px_0px_rgba(0,0,0,0.3)]">
-                <div className="space-y-4">
-                  <div className="border-b-2 border-highlight/20 pb-3">
-                    <p className="text-sm font-body uppercase tracking-wider opacity-70">{type}</p>
-                    <h2 className="text-2xl font-headline font-bold mt-2">{title}</h2>
-                  </div>
-                  <p className="text-base leading-relaxed opacity-90">{data.summary}</p>
-                  
-                  {data.genres && data.genres.length > 0 && (
-                    <div>
-                      <p className="text-sm font-bold uppercase mb-2">Genres:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {data.genres.slice(0, 3).map((g: string) => (
-                          <span key={g} className="bg-brand text-accent px-3 py-1 rounded-full text-xs font-bold border-2 border-accent">
-                            {g}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {data.themes && data.themes.length > 0 && (
-                    <div>
-                      <p className="text-sm font-bold uppercase mb-2">Themes:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {data.themes.slice(0, 3).map((t: string) => (
-                          <span key={t} className="bg-highlight/20 text-highlight px-3 py-1 rounded-full text-xs border border-highlight/40">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {data.consensus && (
-                    <div className="pt-4 border-t-2 border-highlight/20">
-                      <p className="text-sm font-bold uppercase mb-2">What people say:</p>
-                      <p className="text-sm opacity-80">{data.consensus}</p>
-                    </div>
-                  )}
-
-                  {Array.isArray(data.citations) && data.citations.length > 0 && (
-                    <div className="pt-4">
-                      <p className="text-sm font-bold uppercase mb-2">Sources:</p>
-                      <ul className="list-disc ml-6 text-sm opacity-80 space-y-1">
-                        {data.citations.slice(0, 3).map((u: string) => (
-                          <li key={u}>
-                            <a className="underline hover:opacity-60" href={u} target="_blank" rel="noreferrer">
-                              {u}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* AI Response - Error */}
-          {error && (
-            <div className="flex items-start gap-4 p-4 animate-in slide-in-from-bottom-2 duration-300">
-              <p className="font-bold text-lg pt-2 min-w-[80px]">[ AI ]</p>
-              <div className="flex-1 bg-accent/10 border-4 border-dashed border-accent p-6 rounded-2xl">
-                <p className="font-body text-accent">Error: {error}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Loading State */}
-          {loading && (
-            <div className="flex items-start gap-4 p-4 animate-pulse">
-              <p className="font-bold text-lg pt-2 min-w-[80px]">[ AI ]</p>
-              <div className="flex items-center gap-1 pt-3">
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce"></div>
-              </div>
-            </div>
-          )}
+      <main className="w-full max-w-3xl flex flex-col items-center z-10 mt-6 md:mt-8">
+        
+        <div className="text-center mb-8 md:mb-10 space-y-2 px-4">
+          <h2 className="font-serif text-4xl md:text-6xl text-white drop-shadow-sm tracking-wider leading-tight" style={{ fontFamily: "'Abril Fatface', 'DM Serif Display', serif" }}>
+            GET HONEST REVIEWS!
+          </h2>
+          <p className="text-white text-base md:text-lg font-light tracking-wide opacity-95">
+            Enter title below to generate synopsis
+          </p>
         </div>
-      </main>
 
-      {/* Footer Input Form */}
-      <footer className="fixed bottom-0 left-0 right-0 z-20">
-        <div className="max-w-3xl mx-auto px-6 py-4 mb-2">
-          <form 
-            onSubmit={onSubmit}
-            className="bg-brand p-2 rounded-full border-4 border-accent shadow-[6px_6px_0px_#000000] transition-transform focus-within:-translate-y-1"
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-4 w-full px-2">
+          <button
+            type="button"
+            onClick={() => setShowReview(!showReview)}
+            className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
+              showReview ? "bg-[#2a2a2a] text-white shadow-md scale-105" : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+            }`}
           >
-            <div className="flex items-center gap-2">
-              <input 
-                className="flex-1 bg-transparent text-lg font-body placeholder:text-accent/60 focus:outline-none px-4 py-2" 
-                placeholder={loading ? "Analyzing..." : "Enter title (e.g., Naruto)"}
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                disabled={loading}
-                required
-              />
+            Review
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setShowSynopsis(!showSynopsis)}
+            className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
+              showSynopsis ? "bg-[#2a2a2a] text-white shadow-md scale-105" : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+            }`}
+          >
+            Synopsis
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleSpoiler}
+            className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
+              spoilerMode ? "bg-[#2a2a2a] text-white border border-white/20 shadow-md scale-105" : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+            }`}
+          >
+            Spoiler
+          </button>
+        </div>
+
+        <form
+          onSubmit={onSubmit}
+          className="w-full max-w-xl bg-[#58585a] rounded-full p-1.5 pl-4 md:pl-6 flex items-center shadow-xl transition-all hover:shadow-2xl mb-12"
+        >
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            type="text"
+            placeholder="Enter Title..."
+            className="flex-grow bg-transparent text-white placeholder-gray-300/80 outline-none text-base md:text-lg font-normal tracking-wide min-w-0"
+            disabled={loading}
+          />
+          
+          <div className="flex items-center gap-2 pr-1 shrink-0">
+            <div className="relative">
               <select
-                className="bg-accent text-highlight font-body text-sm px-3 py-2 rounded-full border-2 border-accent focus:outline-none"
                 value={type}
-                onChange={(e) => setType(e.target.value as any)}
+                onChange={(e) => setType(e.target.value as MediaType)}
+                className="appearance-none bg-[#d1d1d1] text-[#333] font-bold py-2 pl-3 pr-7 md:pl-4 md:pr-8 rounded-full cursor-pointer hover:bg-white transition outline-none text-xs md:text-sm"
                 disabled={loading}
               >
                 <option value="book">Book</option>
@@ -194,16 +135,137 @@ export default function Home() {
                 <option value="movie">Movie</option>
                 <option value="tv">TV</option>
               </select>
-              <button 
-                type="submit"
-                disabled={loading || !title.trim()}
-                className="flex items-center justify-center size-12 shrink-0 rounded-full bg-accent text-brand hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-bold text-2xl"
-              >
-                {loading ? "⟳" : "↑"}
-              </button>
+              <div className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
             </div>
-          </form>
-        </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={`bg-[#d1d1d1] rounded-full w-9 h-9 md:w-10 md:h-10 flex items-center justify-center text-[#333] hover:bg-white hover:scale-105 transition-all ${
+                loading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="w-full max-w-xl text-red-600 bg-red-100 px-6 py-3 rounded-xl shadow-sm animate-fade-in font-medium mb-6">
+            {error}
+          </div>
+        )}
+
+        {data && (
+          <div className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-2xl animate-pop-in text-gray-800 border border-white/40 mb-20">
+            <div className="flex justify-between items-start mb-6 border-b border-gray-200/60 pb-6">
+              <div className="pr-4">
+                <span className="uppercase text-xs font-bold tracking-widest text-gray-500 mb-2 block">
+                  {type} Result
+                </span>
+                <h3 className="text-2xl md:text-4xl font-serif text-gray-900 leading-tight break-words">
+                  {data.title || title}
+                </h3>
+              </div>
+              <div className="flex flex-col items-center bg-gray-100 px-3 py-2 md:px-4 md:py-3 rounded-xl md:rounded-2xl shadow-inner min-w-[70px] md:min-w-[100px] text-center shrink-0">
+                <span className="text-base md:text-lg font-bold text-gray-800 leading-tight">
+                  {data.rating || "N/A"}
+                </span>
+                <span className="text-[8px] md:text-[10px] uppercase text-gray-500 font-bold tracking-wider mt-1">Score</span>
+              </div>
+            </div>
+
+            {showReview && (
+              <div className="mb-8 animate-fade-in">
+                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Verdict (Review)</h4>
+                <p className="text-lg md:text-xl font-medium italic text-gray-700 leading-relaxed border-l-4 border-[#8278C8] pl-4">
+                  "{data.consensus || "No consensus provided."}"
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                   <div className="bg-green-50/80 p-5 rounded-2xl border border-green-100">
+                    <h4 className="font-bold text-xs uppercase text-green-800 mb-4 tracking-widest flex items-center gap-2">
+                       Hits
+                    </h4>
+                    <ul className="space-y-3">
+                      {Array.isArray(data.themes) && data.themes.slice(0, 3).map((pro: string, i: number) => (
+                        <li key={i} className="text-sm text-gray-700 flex items-start gap-2.5">
+                          <span className="text-green-500 mt-1.5 text-xs shrink-0">●</span>
+                          <span className="leading-snug">{pro}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-red-50/80 p-5 rounded-2xl border border-red-100">
+                    <h4 className="font-bold text-xs uppercase text-red-800 mb-4 tracking-widest flex items-center gap-2">
+                       Misses
+                    </h4>
+                    <ul className="space-y-3">
+                       <li className="text-sm text-gray-500">No major misses highlighted.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showSynopsis && (
+              <div className="mb-8 border-t border-gray-200/60 pt-8 animate-fade-in">
+                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Synopsis</h4>
+                <p className="text-gray-600 leading-relaxed text-base md:text-lg font-light">{data.summary}</p>
+                
+                {Array.isArray(data.character_insights) && (
+                  <div className="mt-6">
+                     <h5 className="font-bold text-xs uppercase text-gray-400 mb-2 tracking-widest">Character Insights</h5>
+                     <ul className="list-disc ml-5 text-sm text-gray-600 space-y-1">
+                        {data.character_insights.slice(0, 3).map((c:string, i:number) => <li key={i}>{c}</li>)}
+                     </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {spoilerMode && (
+              <div className="mb-8 border-t border-red-200/60 pt-8 animate-fade-in bg-red-50/30 p-4 rounded-xl border border-red-100">
+                <h4 className="font-bold text-xs uppercase text-red-500 mb-3 tracking-widest flex items-center gap-2">
+                  ⚠️ Spoilers
+                </h4>
+                <p className="text-gray-700 leading-relaxed text-sm md:text-base">
+                  {data.spoilers || "No spoilers generated. Try requesting again with Spoiler mode active."}
+                </p>
+              </div>
+            )}
+
+            {Array.isArray(data.citations) && data.citations.length > 0 && (
+              <div className="mt-8 pt-6 border-t border-gray-200/60">
+                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Sources</h4>
+                <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1 break-all">
+                  {data.citations.map((u: string, i: number) => (
+                    <li key={i}>
+                      {/^https?:\/\//i.test(u) ? (
+                        <a className="underline hover:text-gray-500" href={u} target="_blank" rel="noreferrer">{u}</a>
+                      ) : (
+                        <span className="text-gray-500">{u}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <footer className="fixed bottom-4 text-center w-full pointer-events-none z-0">
       </footer>
     </div>
   );
