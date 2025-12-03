@@ -66,6 +66,14 @@ export default function Home() {
     }
   }, [data]);
 
+  // Extract short rating (just the number part)
+  const getShortRating = (rating: string) => {
+    if (!rating) return "N/A";
+    // Extract just the first part before any comma, parenthesis, or "with"
+    const match = rating.match(/^([^,(]+)/);
+    return match ? match[1].trim() : rating;
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#C5C5C5] p-4 font-sans relative overflow-x-hidden">
       
@@ -237,7 +245,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col items-center bg-gray-100 px-3 py-2 md:px-4 md:py-3 rounded-xl md:rounded-2xl shadow-inner min-w-[70px] md:min-w-[100px] text-center shrink-0">
                 <span className="text-base md:text-lg font-bold text-gray-800 leading-tight">
-                  {data.rating || "N/A"}
+                  {getShortRating(data.rating)}
                 </span>
                 <span className="text-[8px] md:text-[10px] uppercase text-gray-500 font-bold tracking-wider mt-1">Score</span>
               </div>
@@ -249,27 +257,50 @@ export default function Home() {
                 <p className="text-lg md:text-xl font-medium italic text-gray-700 leading-relaxed border-l-4 border-[#8278C8] pl-4">
                   "{data.consensus || "No consensus provided."}"
                 </p>
+
+                {/* Detailed Review Text */}
+                {data.detailed_review && (
+                  <div className="mt-4 text-gray-600 text-sm md:text-base leading-relaxed">
+                    {data.detailed_review}
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                   {/* HITS (Strengths) */}
                    <div className="bg-green-50/80 p-5 rounded-2xl border border-green-100">
                     <h4 className="font-bold text-xs uppercase text-green-800 mb-4 tracking-widest flex items-center gap-2">
                        Hits
                     </h4>
                     <ul className="space-y-3">
-                      {Array.isArray(data.themes) && data.themes.slice(0, 3).map((pro: string, i: number) => (
-                        <li key={i} className="text-sm text-gray-700 flex items-start gap-2.5">
-                          <span className="text-green-500 mt-1.5 text-xs shrink-0">●</span>
-                          <span className="leading-snug">{pro}</span>
-                        </li>
-                      ))}
+                      {Array.isArray(data.strengths) && data.strengths.length > 0 ? (
+                        data.strengths.slice(0, 5).map((strength: string, i: number) => (
+                          <li key={i} className="text-sm text-gray-700 flex items-start gap-2.5">
+                            <span className="text-green-500 mt-1.5 text-xs shrink-0">●</span>
+                            <span className="leading-snug">{strength}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-sm text-gray-500">No strengths highlighted.</li>
+                      )}
                     </ul>
                   </div>
+
+                  {/* MISSES (Weaknesses) */}
                   <div className="bg-red-50/80 p-5 rounded-2xl border border-red-100">
                     <h4 className="font-bold text-xs uppercase text-red-800 mb-4 tracking-widest flex items-center gap-2">
                        Misses
                     </h4>
                     <ul className="space-y-3">
-                       <li className="text-sm text-gray-500">No major misses highlighted.</li>
+                      {Array.isArray(data.weaknesses) && data.weaknesses.length > 0 ? (
+                        data.weaknesses.slice(0, 4).map((weakness: string, i: number) => (
+                          <li key={i} className="text-sm text-gray-700 flex items-start gap-2.5">
+                            <span className="text-red-500 mt-1.5 text-xs">●</span>
+                            <span className="leading-snug">{weakness}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-sm text-gray-500">No weaknesses noted.</li>
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -281,7 +312,7 @@ export default function Home() {
                 <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Synopsis</h4>
                 <p className="text-gray-600 leading-relaxed text-base md:text-lg font-light">{data.summary}</p>
                 
-                {Array.isArray(data.character_insights) && (
+                {Array.isArray(data.character_insights) && data.character_insights.length > 0 && (
                   <div className="mt-6">
                      <h5 className="font-bold text-xs uppercase text-gray-400 mb-2 tracking-widest">Character Insights</h5>
                      <ul className="list-disc ml-5 text-sm text-gray-600 space-y-1">

@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Missing title or type" }, { status: 400 });
         }
 
-        // Only allow detailed mode if pro is active
         const effectiveMode: Mode = mode === "detailed" && pro ? "detailed" : "simple";
 
         const client = new OpenAI({
@@ -26,63 +25,90 @@ export async function POST(req: NextRequest) {
             baseURL: "https://api.perplexity.ai",
         });
 
-        // Updated Schema: Added 'rating' and 'spoilers'
         const schema = {
             type: "object" as const,
             additionalProperties: false,
             properties: {
                 summary: {
                     type: "string" as const,
-                    description: "A concise synopsis of the plot (80–120 words)."
+                    description: "A thorough, engaging synopsis that covers the main plot, tone, and standout moments (150-200 words)."
                 },
                 rating: {
                     type: "string" as const,
-                    description: "Real world score (e.g., '8.5/10 IMDb', '92% Rotten Tomatoes', '4.5/5 Goodreads'). If unknown, give a fair estimate."
+                    description: "Real-world score from IMDb, Rotten Tomatoes, MyAnimeList, or Goodreads. Format: '8.5/10 IMDb' or '92% RT'. If unavailable, provide a fair critical estimate."
                 },
                 genres: {
                     type: "array" as const,
                     items: { type: "string" as const },
                     minItems: 3,
-                    maxItems: 3,
+                    maxItems: 4,
                 },
-                themes: {
+                strengths: {
                     type: "array" as const,
                     items: { type: "string" as const },
                     minItems: 3,
-                    maxItems: 3,
+                    maxItems: 5,
+                    description: "Specific positive aspects that work well. Be concrete about WHY they work."
+                },
+                weaknesses: {
+                    type: "array" as const,
+                    items: { type: "string" as const },
+                    minItems: 2,
+                    maxItems: 4,
+                    description: "REQUIRED: Genuine criticisms from critics or audiences. Every work has flaws - identify them honestly (pacing issues, plot holes, weak characters, inconsistent tone, rushed ending, etc.)"
                 },
                 consensus: {
                     type: "string" as const,
-                    description: "One sentence of general audience or critic consensus.",
+                    description: "A balanced sentence capturing both praise and criticism (40-60 words).",
+                },
+                detailed_review: {
+                    type: "string" as const,
+                    description: "3-4 sentences analyzing quality, execution, and impact. Be honest about both strengths AND weaknesses."
                 },
                 character_insights: {
                     type: "array" as const,
                     items: { type: "string" as const },
                 },
-                // New Dedicated Spoiler Field
                 spoilers: {
                     type: "string" as const,
-                    description: "A summary of the ending or major plot twists. Only populate if requested, otherwise leave empty."
+                    description: "If requested: Major plot revelations and ending (100-150 words). Otherwise empty string."
                 },
                 citations: {
                     type: "array" as const,
                     items: { type: "string" as const },
                 },
             },
-            required: ["summary", "genres", "themes", "consensus", "rating"],
+            required: ["summary", "genres", "consensus", "rating", "detailed_review", "strengths", "weaknesses"],
         };
 
         const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `You are a media critic. Provide accurate details.
-        - For 'rating', find the actual MyAnimeList, IMDb, Rotten Tomatoes, or Goodreads score.
-        - If 'spoilers' are requested, summarize the ending or big twist in the 'spoilers' field.
-        - Return strictly valid JSON matching the schema.`
+                content: `You are a professional media critic. Write balanced, honest reviews.
+
+CRITICAL REQUIREMENT: You MUST identify genuine weaknesses. Every work has flaws - no exceptions. Common issues include:
+- Pacing problems (too slow/rushed)
+- Underdeveloped characters or arcs
+- Plot holes or contrivances
+- Weak/predictable endings
+- Tonal inconsistencies
+- Uneven quality across episodes/chapters
+
+Your reviews should be:
+✓ Specific with examples
+✓ Balanced (highlight good AND bad)
+✓ Honest about actual reception (check real reviews)
+✓ Professional but critical
+
+NEVER say "no flaws" or "perfect" - that's unrealistic and unhelpful to readers.`
             },
             {
                 role: "user",
-                content: `Title: ${title}\nType: ${type}\nMode: ${effectiveMode}\nSpoilers Requested: ${spoiler}\nProvide JSON.`,
+                content: `Review: "${title}" (${type})
+Mode: ${effectiveMode}
+Spoilers: ${spoiler ? "Yes" : "No"}
+
+Provide an honest, critical analysis. Include at least 2-3 legitimate weaknesses that critics or audiences have noted.`,
             },
         ];
 
@@ -97,14 +123,13 @@ export async function POST(req: NextRequest) {
                     strict: true,
                 },
             },
-            temperature: 0.2, // Lower temperature for more factual accuracy on scores
-            max_tokens: 1000,
+            temperature: 0.4,
+            max_tokens: 2000,
         });
 
         const raw = completion.choices?.[0]?.message?.content ?? "{}";
         const parsed = JSON.parse(raw);
 
-        // Extract citations from metadata if available
         const citations: string[] = [];
         if (completion.choices?.[0]?.message) {
             const msg = completion.choices[0].message as any;
