@@ -2,11 +2,11 @@
 
 /* 1. Register the Custom Font */
 @font-face {
-  font-family: 'BlueRabbit';  /* Removed space to be safe */
+  font-family: 'BlueRabbit';
   src: url('/fonts/BlueRabbit.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap; /* Good practice */
+  font-display: swap;
 }
 
 @theme {
@@ -16,7 +16,6 @@
   --color-purpleBlur: #8278C8;
   
   /* Fonts */
-  /* Make sure this matches the font-family name above exactly */
   --font-logo: "BlueRabbit", sans-serif; 
   --font-serif: "DM Serif Display", serif;
   --font-sans: "Inter", sans-serif;
@@ -39,3 +38,53 @@ html, body {
   background: #888;
   border-radius: 4px;
 }
+
+/* Floating purple blob animations */
+@keyframes blob-float-1 {
+  0% { 
+    transform: translate(0px, 0px) scale(1); 
+  }
+  33% { 
+    transform: translate(120px, -100px) scale(1.15); 
+  }
+  66% { 
+    transform: translate(-80px, 80px) scale(0.9); 
+  }
+  100% { 
+    transform: translate(0px, 0px) scale(1); 
+  }
+}
+
+@keyframes blob-float-2 {
+  0% { 
+    transform: translate(0px, 0px) scale(1); 
+  }
+  33% { 
+    transform: translate(-100px, 90px) scale(1.12); 
+  }
+  66% { 
+    transform: translate(80px, -70px) scale(0.88); 
+  }
+  100% { 
+    transform: translate(0px, 0px) scale(1); 
+  }
+}
+
+@keyframes blob-float-3 {
+  0% { 
+    transform: translate(0px, 0px) scale(1); 
+  }
+  33% { 
+    transform: translate(90px, 110px) scale(1.1); 
+  }
+  66% { 
+    transform: translate(-110px, -60px) scale(0.92); 
+  }
+  100% { 
+    transform: translate(0px, 0px) scale(1); 
+  }
+}
+
+.animate-blob-1 { animation: blob-float-1 18s ease-in-out infinite; }
+.animate-blob-2 { animation: blob-float-2 22s ease-in-out infinite; }
+.animate-blob-3 { animation: blob-float-3 26s ease-in-out infinite; }

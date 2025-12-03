@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 type MediaType = "book" | "manga" | "movie" | "tv";
 
@@ -14,6 +14,8 @@ export default function Home() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const toggleSpoiler = () => {
     if (!spoilerMode) {
@@ -53,14 +55,67 @@ export default function Home() {
     }
   }
 
+  useEffect(() => {
+    if (data && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "start" 
+        });
+      }, 100);
+    }
+  }, [data]);
+
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#C5C5C5] p-4 font-sans relative overflow-x-hidden">
       
-      <div className="fixed top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] md:w-[120%] h-[400px] md:h-[500px] bg-[#7D73C3] blur-[100px] md:blur-[130px] rounded-[100%] opacity-90 pointer-events-none z-0" />
+      {/* Animated purple blobs */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute animate-blob-1"
+          style={{ 
+            top: '15%',
+            left: '20%',
+            width: '700px',
+            height: '700px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(130, 120, 200, 0.9) 0%, rgba(130, 120, 200, 0.4) 40%, transparent 70%)',
+            filter: 'blur(80px)',
+            willChange: 'transform'
+          }}
+        />
+        
+        <div
+          className="absolute animate-blob-2"
+          style={{ 
+            top: '0',
+            right: '5%',
+            width: '550px',
+            height: '550px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(160, 150, 240, 0.8) 0%, rgba(160, 150, 240, 0.35) 40%, transparent 70%)',
+            filter: 'blur(70px)',
+            willChange: 'transform'
+          }}
+        />
+
+        <div
+          className="absolute animate-blob-3"
+          style={{ 
+            bottom: '5%',
+            left: '0',
+            width: '600px',
+            height: '600px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(140, 130, 220, 0.85) 0%, rgba(140, 130, 220, 0.4) 40%, transparent 70%)',
+            filter: 'blur(70px)',
+            willChange: 'transform'
+          }}
+        />
+      </div>
 
       {/* Header */}
-      <header className="w-full text-center pt-8 md:pt-12 pb-2 z-10">
-        {/* Explicitly setting font family in inline style to force it */}
+      <header className="w-full text-center pt-4 md:pt-4 pb-2 z-10">
         <h1 className="text-2xl md:text-4xl tracking-wide text-[#333333]" style={{ fontFamily: "'BlueRabbit', sans-serif" }}>
           reevyou
         </h1>
@@ -68,7 +123,7 @@ export default function Home() {
 
       <main className="w-full max-w-3xl flex flex-col items-center z-10 mt-6 md:mt-8">
         
-        <div className="text-center mb-8 md:mb-10 space-y-2 px-4">
+        <div className="text-center mt-40 mb-12 md:mb-10 space-y-2 px-4">
           <h2 className="font-serif text-4xl md:text-6xl text-white drop-shadow-sm tracking-wider leading-tight" style={{ fontFamily: "'Abril Fatface', 'DM Serif Display', serif" }}>
             GET HONEST REVIEWS!
           </h2>
@@ -77,7 +132,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-4 w-full px-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mt-20 mb-3 w-full px-2">
           <button
             type="button"
             onClick={() => setShowReview(!showReview)}
@@ -167,7 +222,10 @@ export default function Home() {
         )}
 
         {data && (
-          <div className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-2xl animate-pop-in text-gray-800 border border-white/40 mb-20">
+          <div 
+            ref={resultsRef}
+            className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-2xl animate-pop-in text-gray-800 border border-white/40 mb-20 transition-all duration-500 ease-in-out"
+          >
             <div className="flex justify-between items-start mb-6 border-b border-gray-200/60 pb-6">
               <div className="pr-4">
                 <span className="uppercase text-xs font-bold tracking-widest text-gray-500 mb-2 block">
