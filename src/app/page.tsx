@@ -67,7 +67,6 @@ export default function Home() {
     }
   }, [data]);
 
-  // Extract short rating (just the number part)
   const getShortRating = (rating: string) => {
     if (!rating) return "N/A";
     const match = rating.match(/^([^,(]+)/);
@@ -96,7 +95,6 @@ export default function Home() {
             willChange: "transform",
           }}
         />
-
         <div
           className="absolute animate-blob-2"
           style={{
@@ -111,7 +109,6 @@ export default function Home() {
             willChange: "transform",
           }}
         />
-
         <div
           className="absolute animate-blob-3"
           style={{
@@ -127,6 +124,56 @@ export default function Home() {
           }}
         />
       </div>
+
+      {/* ── Fixed magnify toggle — top-right corner ── */}
+      <button
+        type="button"
+        onClick={() => setLargeText(!largeText)}
+        aria-pressed={largeText}
+        aria-label="Toggle large text"
+        className={`fixed top-4 right-4 z-50 flex items-center justify-center w-10 h-10 rounded-full border border-white/40 backdrop-blur-md shadow-md transition-all duration-200 hover:scale-110 ${
+          largeText
+            ? "bg-white text-[#2a2a2a]"
+            : "bg-black/25 text-white hover:bg-black/40"
+        }`}
+      >
+        {largeText ? (
+          /* Magnify-minus (active: shrink back) */
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        ) : (
+          /* Magnify-plus (inactive: enlarge) */
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            <line x1="11" y1="8" x2="11" y2="14" />
+            <line x1="8" y1="11" x2="14" y2="11" />
+          </svg>
+        )}
+      </button>
 
       {/* Header */}
       <header className="w-full text-center pt-4 md:pt-4 pb-2 z-10">
@@ -159,7 +206,7 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Toggles row */}
+        {/* Toggles row — Large text removed from here */}
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mt-20 mb-3 w-full px-2">
           <button
             type="button"
@@ -195,20 +242,6 @@ export default function Home() {
             }`}
           >
             Spoiler
-          </button>
-
-          {/* Large text toggle */}
-          <button
-            type="button"
-            onClick={() => setLargeText(!largeText)}
-            aria-pressed={largeText}
-            className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
-              largeText
-                ? "bg-white text-[#2a2a2a] shadow-md scale-105"
-                : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
-            }`}
-          >
-            Large text
           </button>
         </div>
 
@@ -353,7 +386,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                   <div className="bg-green-50/80 p-5 rounded-2xl border border-green-100">
-                    <h4 className="font-bold text-xs uppercase text-green-800 mb-4 tracking-widest flex items-center gap-2">
+                    <h4 className="font-bold text-xs uppercase text-green-800 mb-4 tracking-widest">
                       Hits
                     </h4>
                     <ul className="space-y-3">
@@ -376,7 +409,7 @@ export default function Home() {
                   </div>
 
                   <div className="bg-red-50/80 p-5 rounded-2xl border border-red-100">
-                    <h4 className="font-bold text-xs uppercase text-red-800 mb-4 tracking-widest flex items-center gap-2">
+                    <h4 className="font-bold text-xs uppercase text-red-800 mb-4 tracking-widest">
                       Misses
                     </h4>
                     <ul className="space-y-3">
@@ -476,7 +509,7 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="fixed bottom-4 text-center w-full pointer-events-none z-0"></footer>
+      <footer className="fixed bottom-4 text-center w-full pointer-events-none z-0" />
     </div>
   );
 }
