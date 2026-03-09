@@ -6,7 +6,8 @@ type MediaType = "book" | "manga" | "movie" | "tv";
 export default function Home() {
   const [title, setTitle] = useState("");
   const [type, setType] = useState<MediaType>("manga");
-  
+  const [largeText, setLargeText] = useState(false);
+
   const [showReview, setShowReview] = useState(true);
   const [showSynopsis, setShowSynopsis] = useState(false);
   const [spoilerMode, setSpoilerMode] = useState(false);
@@ -36,15 +37,15 @@ export default function Home() {
       const res = await fetch("/api/generate-review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          title, 
-          type, 
-          mode: showSynopsis ? "detailed" : "simple", 
-          spoiler: spoilerMode, 
-          pro: true 
+        body: JSON.stringify({
+          title,
+          type,
+          mode: showSynopsis ? "detailed" : "simple",
+          spoiler: spoilerMode,
+          pro: true,
         }),
       });
-      
+
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Request failed");
       setData({ ...json, title });
@@ -58,9 +59,9 @@ export default function Home() {
   useEffect(() => {
     if (data && resultsRef.current) {
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "start" 
+        resultsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
         });
       }, 100);
     }
@@ -69,93 +70,116 @@ export default function Home() {
   // Extract short rating (just the number part)
   const getShortRating = (rating: string) => {
     if (!rating) return "N/A";
-    // Extract just the first part before any comma, parenthesis, or "with"
     const match = rating.match(/^([^,(]+)/);
     return match ? match[1].trim() : rating;
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-[#C5C5C5] p-4 font-sans relative overflow-x-hidden">
-      
+    <div
+      className={`min-h-screen flex flex-col items-center bg-[#C5C5C5] p-4 font-sans relative overflow-x-hidden ${
+        largeText ? "text-[1.05rem]" : "text-base"
+      }`}
+    >
       {/* Animated purple blobs */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div
           className="absolute animate-blob-1"
-          style={{ 
-            top: '15%',
-            left: '20%',
-            width: '700px',
-            height: '700px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(130, 120, 200, 0.9) 0%, rgba(130, 120, 200, 0.4) 40%, transparent 70%)',
-            filter: 'blur(80px)',
-            willChange: 'transform'
+          style={{
+            top: "15%",
+            left: "20%",
+            width: "700px",
+            height: "700px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(130, 120, 200, 0.9) 0%, rgba(130, 120, 200, 0.4) 40%, transparent 70%)",
+            filter: "blur(80px)",
+            willChange: "transform",
           }}
         />
-        
+
         <div
           className="absolute animate-blob-2"
-          style={{ 
-            top: '0',
-            right: '5%',
-            width: '550px',
-            height: '550px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(160, 150, 240, 0.8) 0%, rgba(160, 150, 240, 0.35) 40%, transparent 70%)',
-            filter: 'blur(70px)',
-            willChange: 'transform'
+          style={{
+            top: "0",
+            right: "5%",
+            width: "550px",
+            height: "550px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(160, 150, 240, 0.8) 0%, rgba(160, 150, 240, 0.35) 40%, transparent 70%)",
+            filter: "blur(70px)",
+            willChange: "transform",
           }}
         />
 
         <div
           className="absolute animate-blob-3"
-          style={{ 
-            bottom: '5%',
-            left: '0',
-            width: '600px',
-            height: '600px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(140, 130, 220, 0.85) 0%, rgba(140, 130, 220, 0.4) 40%, transparent 70%)',
-            filter: 'blur(70px)',
-            willChange: 'transform'
+          style={{
+            bottom: "5%",
+            left: "0",
+            width: "600px",
+            height: "600px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(140, 130, 220, 0.85) 0%, rgba(140, 130, 220, 0.4) 40%, transparent 70%)",
+            filter: "blur(70px)",
+            willChange: "transform",
           }}
         />
       </div>
 
       {/* Header */}
       <header className="w-full text-center pt-4 md:pt-4 pb-2 z-10">
-        <h1 className="text-2xl md:text-4xl tracking-wide text-[#333333]" style={{ fontFamily: "'BlueRabbit', sans-serif" }}>
+        <h1
+          className={`tracking-wide text-[#333333] ${
+            largeText ? "text-3xl md:text-5xl" : "text-2xl md:text-4xl"
+          }`}
+          style={{ fontFamily: "'BlueRabbit', sans-serif" }}
+        >
           reevyou
         </h1>
       </header>
 
       <main className="w-full max-w-3xl flex flex-col items-center z-10 mt-6 md:mt-8">
-        
         <div className="text-center mt-40 mb-12 md:mb-10 space-y-2 px-4">
-          <h2 className="font-serif text-4xl md:text-6xl text-white drop-shadow-sm tracking-wider leading-tight" style={{ fontFamily: "'Abril Fatface', 'DM Serif Display', serif" }}>
+          <h2
+            className={`font-serif text-white drop-shadow-sm tracking-wider leading-tight ${
+              largeText ? "text-5xl md:text-7xl" : "text-4xl md:text-6xl"
+            }`}
+            style={{ fontFamily: "'Abril Fatface', 'DM Serif Display', serif" }}
+          >
             GET HONEST REVIEWS!
           </h2>
-          <p className="text-white text-base md:text-lg font-light tracking-wide opacity-95">
+          <p
+            className={`text-white font-light tracking-wide opacity-95 ${
+              largeText ? "text-lg md:text-xl" : "text-base md:text-lg"
+            }`}
+          >
             Enter title below to generate synopsis
           </p>
         </div>
 
+        {/* Toggles row */}
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mt-20 mb-3 w-full px-2">
           <button
             type="button"
             onClick={() => setShowReview(!showReview)}
             className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
-              showReview ? "bg-[#2a2a2a] text-white shadow-md scale-105" : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+              showReview
+                ? "bg-[#2a2a2a] text-white shadow-md scale-105"
+                : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
             }`}
           >
             Review
           </button>
-          
+
           <button
             type="button"
             onClick={() => setShowSynopsis(!showSynopsis)}
             className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
-              showSynopsis ? "bg-[#2a2a2a] text-white shadow-md scale-105" : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+              showSynopsis
+                ? "bg-[#2a2a2a] text-white shadow-md scale-105"
+                : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
             }`}
           >
             Synopsis
@@ -165,10 +189,26 @@ export default function Home() {
             type="button"
             onClick={toggleSpoiler}
             className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
-              spoilerMode ? "bg-[#2a2a2a] text-white border border-white/20 shadow-md scale-105" : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+              spoilerMode
+                ? "bg-[#2a2a2a] text-white border border-white/20 shadow-md scale-105"
+                : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
             }`}
           >
             Spoiler
+          </button>
+
+          {/* Large text toggle */}
+          <button
+            type="button"
+            onClick={() => setLargeText(!largeText)}
+            aria-pressed={largeText}
+            className={`px-4 md:px-5 py-2 rounded-full text-xs md:text-sm font-bold transition-all duration-200 ${
+              largeText
+                ? "bg-white text-[#2a2a2a] shadow-md scale-105"
+                : "bg-[#6B6B6B]/50 text-white/90 hover:bg-[#6B6B6B]/70"
+            }`}
+          >
+            Large text
           </button>
         </div>
 
@@ -176,18 +216,28 @@ export default function Home() {
           onSubmit={onSubmit}
           className="w-full max-w-xl bg-[#58585a] rounded-full p-1.5 pl-4 md:pl-6 flex items-center shadow-xl transition-all hover:shadow-2xl mb-12"
         >
+          <label className="sr-only" htmlFor="title-input">
+            Enter title to review
+          </label>
           <input
+            id="title-input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             type="text"
             placeholder="Enter Title..."
-            className="flex-grow bg-transparent text-white placeholder-gray-300/80 outline-none text-base md:text-lg font-normal tracking-wide min-w-0"
+            className={`flex-grow bg-transparent text-white placeholder-gray-300/80 outline-none font-normal tracking-wide min-w-0 ${
+              largeText ? "text-lg md:text-xl" : "text-base md:text-lg"
+            }`}
             disabled={loading}
           />
-          
+
           <div className="flex items-center gap-2 pr-1 shrink-0">
             <div className="relative">
+              <label className="sr-only" htmlFor="type-select">
+                Select media type
+              </label>
               <select
+                id="type-select"
                 value={type}
                 onChange={(e) => setType(e.target.value as MediaType)}
                 className="appearance-none bg-[#d1d1d1] text-[#333] font-bold py-2 pl-3 pr-7 md:pl-4 md:pr-8 rounded-full cursor-pointer hover:bg-white transition outline-none text-xs md:text-sm"
@@ -199,7 +249,15 @@ export default function Home() {
                 <option value="tv">TV</option>
               </select>
               <div className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#333]">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  stroke="currentColor"
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                 </svg>
               </div>
@@ -215,10 +273,19 @@ export default function Home() {
               {loading ? (
                 <div className="w-4 h-4 border-2 border-[#333] border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2.5}
+                  stroke="currentColor"
+                  className="w-4 h-4 md:w-5 md:h-5"
+                  aria-hidden="true"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
                 </svg>
               )}
+              <span className="sr-only">Generate review</span>
             </button>
           </div>
         </form>
@@ -230,7 +297,7 @@ export default function Home() {
         )}
 
         {data && (
-          <div 
+          <div
             ref={resultsRef}
             className="w-full max-w-2xl bg-white/80 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-2xl animate-pop-in text-gray-800 border border-white/40 mb-20 transition-all duration-500 ease-in-out"
           >
@@ -239,42 +306,65 @@ export default function Home() {
                 <span className="uppercase text-xs font-bold tracking-widest text-gray-500 mb-2 block">
                   {type} Result
                 </span>
-                <h3 className="text-2xl md:text-4xl font-serif text-gray-900 leading-tight break-words">
+                <h3
+                  className={`font-serif text-gray-900 leading-tight break-words ${
+                    largeText ? "text-3xl md:text-5xl" : "text-2xl md:text-4xl"
+                  }`}
+                >
                   {data.title || title}
                 </h3>
               </div>
               <div className="flex flex-col items-center bg-gray-100 px-3 py-2 md:px-4 md:py-3 rounded-xl md:rounded-2xl shadow-inner min-w-[70px] md:min-w-[100px] text-center shrink-0">
-                <span className="text-base md:text-lg font-bold text-gray-800 leading-tight">
+                <span
+                  className={`font-bold text-gray-800 leading-tight ${
+                    largeText ? "text-lg md:text-xl" : "text-base md:text-lg"
+                  }`}
+                >
                   {getShortRating(data.rating)}
                 </span>
-                <span className="text-[8px] md:text-[10px] uppercase text-gray-500 font-bold tracking-wider mt-1">Score</span>
+                <span className="text-[8px] md:text-[10px] uppercase text-gray-500 font-bold tracking-wider mt-1">
+                  Score
+                </span>
               </div>
             </div>
 
             {showReview && (
               <div className="mb-8 animate-fade-in">
-                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Verdict (Review)</h4>
-                <p className="text-lg md:text-xl font-medium italic text-gray-700 leading-relaxed border-l-4 border-[#8278C8] pl-4">
+                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">
+                  Verdict (Review)
+                </h4>
+                <p
+                  className={`font-medium italic text-gray-700 leading-relaxed border-l-4 border-[#8278C8] pl-4 ${
+                    largeText ? "text-xl md:text-2xl" : "text-lg md:text-xl"
+                  }`}
+                >
                   "{data.consensus || "No consensus provided."}"
                 </p>
 
-                {/* Detailed Review Text */}
                 {data.detailed_review && (
-                  <div className="mt-4 text-gray-600 text-sm md:text-base leading-relaxed">
+                  <div
+                    className={`mt-4 text-gray-600 leading-relaxed ${
+                      largeText ? "text-base md:text-lg" : "text-sm md:text-base"
+                    }`}
+                  >
                     {data.detailed_review}
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                   {/* HITS (Strengths) */}
-                   <div className="bg-green-50/80 p-5 rounded-2xl border border-green-100">
+                  <div className="bg-green-50/80 p-5 rounded-2xl border border-green-100">
                     <h4 className="font-bold text-xs uppercase text-green-800 mb-4 tracking-widest flex items-center gap-2">
-                       Hits
+                      Hits
                     </h4>
                     <ul className="space-y-3">
                       {Array.isArray(data.strengths) && data.strengths.length > 0 ? (
                         data.strengths.slice(0, 5).map((strength: string, i: number) => (
-                          <li key={i} className="text-sm text-gray-700 flex items-start gap-2.5">
+                          <li
+                            key={i}
+                            className={`text-gray-700 flex items-start gap-2.5 ${
+                              largeText ? "text-sm md:text-base" : "text-sm"
+                            }`}
+                          >
                             <span className="text-green-500 mt-1.5 text-xs shrink-0">●</span>
                             <span className="leading-snug">{strength}</span>
                           </li>
@@ -285,15 +375,19 @@ export default function Home() {
                     </ul>
                   </div>
 
-                  {/* MISSES (Weaknesses) */}
                   <div className="bg-red-50/80 p-5 rounded-2xl border border-red-100">
                     <h4 className="font-bold text-xs uppercase text-red-800 mb-4 tracking-widest flex items-center gap-2">
-                       Misses
+                      Misses
                     </h4>
                     <ul className="space-y-3">
                       {Array.isArray(data.weaknesses) && data.weaknesses.length > 0 ? (
                         data.weaknesses.slice(0, 4).map((weakness: string, i: number) => (
-                          <li key={i} className="text-sm text-gray-700 flex items-start gap-2.5">
+                          <li
+                            key={i}
+                            className={`text-gray-700 flex items-start gap-2.5 ${
+                              largeText ? "text-sm md:text-base" : "text-sm"
+                            }`}
+                          >
                             <span className="text-red-500 mt-1.5 text-xs">●</span>
                             <span className="leading-snug">{weakness}</span>
                           </li>
@@ -309,15 +403,31 @@ export default function Home() {
 
             {showSynopsis && (
               <div className="mb-8 border-t border-gray-200/60 pt-8 animate-fade-in">
-                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Synopsis</h4>
-                <p className="text-gray-600 leading-relaxed text-base md:text-lg font-light">{data.summary}</p>
-                
+                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">
+                  Synopsis
+                </h4>
+                <p
+                  className={`text-gray-600 leading-relaxed font-light ${
+                    largeText ? "text-lg md:text-xl" : "text-base md:text-lg"
+                  }`}
+                >
+                  {data.summary}
+                </p>
+
                 {Array.isArray(data.character_insights) && data.character_insights.length > 0 && (
                   <div className="mt-6">
-                     <h5 className="font-bold text-xs uppercase text-gray-400 mb-2 tracking-widest">Character Insights</h5>
-                     <ul className="list-disc ml-5 text-sm text-gray-600 space-y-1">
-                        {data.character_insights.slice(0, 3).map((c:string, i:number) => <li key={i}>{c}</li>)}
-                     </ul>
+                    <h5 className="font-bold text-xs uppercase text-gray-400 mb-2 tracking-widest">
+                      Character Insights
+                    </h5>
+                    <ul
+                      className={`list-disc ml-5 text-gray-600 space-y-1 ${
+                        largeText ? "text-sm md:text-base" : "text-sm"
+                      }`}
+                    >
+                      {data.character_insights.slice(0, 3).map((c: string, i: number) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
@@ -328,7 +438,11 @@ export default function Home() {
                 <h4 className="font-bold text-xs uppercase text-red-500 mb-3 tracking-widest flex items-center gap-2">
                   ⚠️ Spoilers
                 </h4>
-                <p className="text-gray-700 leading-relaxed text-sm md:text-base">
+                <p
+                  className={`text-gray-700 leading-relaxed ${
+                    largeText ? "text-base md:text-lg" : "text-sm md:text-base"
+                  }`}
+                >
                   {data.spoilers || "No spoilers generated. Try requesting again with Spoiler mode active."}
                 </p>
               </div>
@@ -336,12 +450,20 @@ export default function Home() {
 
             {Array.isArray(data.citations) && data.citations.length > 0 && (
               <div className="mt-8 pt-6 border-t border-gray-200/60">
-                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">Sources</h4>
-                <ul className="list-disc ml-6 text-sm text-gray-700 space-y-1 break-all">
+                <h4 className="font-bold text-xs uppercase text-gray-400 mb-3 tracking-widest">
+                  Sources
+                </h4>
+                <ul
+                  className={`list-disc ml-6 text-gray-700 space-y-1 break-all ${
+                    largeText ? "text-sm md:text-base" : "text-sm"
+                  }`}
+                >
                   {data.citations.map((u: string, i: number) => (
                     <li key={i}>
                       {/^https?:\/\//i.test(u) ? (
-                        <a className="underline hover:text-gray-500" href={u} target="_blank" rel="noreferrer">{u}</a>
+                        <a className="underline hover:text-gray-500" href={u} target="_blank" rel="noreferrer">
+                          {u}
+                        </a>
                       ) : (
                         <span className="text-gray-500">{u}</span>
                       )}
@@ -354,8 +476,7 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="fixed bottom-4 text-center w-full pointer-events-none z-0">
-      </footer>
+      <footer className="fixed bottom-4 text-center w-full pointer-events-none z-0"></footer>
     </div>
   );
 }
